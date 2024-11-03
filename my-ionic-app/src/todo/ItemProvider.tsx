@@ -4,6 +4,9 @@ import { getLogger } from '../core';
 import { ItemProps } from './ItemProps';
 import { createItem, getItems, newWebSocket, updateItem } from './itemApi';
 import { AuthContext } from '../auth';
+import { useIonToast } from '@ionic/react';
+import { Preferences } from '@capacitor/preferences';
+import { useNetwork } from '../pages/useNetwork';
 
 const log = getLogger('ItemProvider');
 
@@ -73,9 +76,16 @@ export const ItemProvider: React.FC<ItemProviderProps> = ({ children }) => {
   const { token } = useContext(AuthContext);
   const [state, dispatch] = useReducer(reducer, initialState);
   const { items, fetching, fetchingError, saving, savingError } = state;
+  const [toast] = useIonToast();
+  const { networkStatus } = useNetwork();
+
+
   useEffect(getItemsEffect, [token]);
   useEffect(wsEffect, [token]);
+  useEffect(executePendingOperations, [networkStatus.connected, token, toast]);
   const saveItem = useCallback<SaveItemFn>(saveItemCallback, [token]);
+
+
   const value = { items, fetching, fetchingError, saving, savingError, saveItem };
   log('returns');
   return (
@@ -118,7 +128,15 @@ export const ItemProvider: React.FC<ItemProviderProps> = ({ children }) => {
       dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item: savedItem } });
     } catch (error) {
       log('saveItem failed');
-      dispatch({ type: SAVE_ITEM_FAILED, payload: { error } });
+
+      item.isNotSaved = true;
+      await Preferences.set({
+        key: 'unsavedItem-${item._id}',
+        value: JSON.stringify({token, item})
+      });
+
+      alert('Item saved locally, will be synced when connection is available');
+      dispatch({ type: SAVE_ITEM_SUCCEEDED, payload: { item } });
     }
   }
 
@@ -144,4 +162,27 @@ export const ItemProvider: React.FC<ItemProviderProps> = ({ children }) => {
       closeWebSocket?.();
     }
   }
+  function executePendingOperations(){
+    async function helper() {
+      if (networkStatus.connected) {
+        log('executePendingOperations - connected');
+        const { keys } = await Preferences.keys();
+        for (const key of keys) {
+          if (key.startsWith('unsavedItem-')) {
+            const res = await Preferences.get({ key });
+            if (res.value) {
+              const { token, item } = JSON.parse(res.value);
+              await saveItemCallback(item);
+              await Preferences.remove({ key });
+            }
+          }
+        }
+        toast('All items are synced', 3000);
+      }
+    }
+    helper();
+  }
+  
 };
+
+

@@ -18,7 +18,10 @@ export const updateItem: (token: string, item: ItemProps) => Promise<ItemProps[]
 
 interface MessageData {
   type: string;
-  payload: ItemProps;
+  payload: {
+    successsMessage: string,
+    updatedItem: ItemProps,
+  };
 }
 
 const log = getLogger('ws');

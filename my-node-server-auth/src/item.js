@@ -62,9 +62,10 @@ const createItem = async (ctx, item, response) => {
   try {
     const userId = ctx.state.user._id;
     item.userId = userId;
+    item.isNotSaved = false;
     response.body = await itemStore.insert(item);
     response.status = 201; // created
-    broadcast(userId, { type: 'created', payload: item });
+    broadcast(userId, { type: 'created', payload: {updatedItem: item} });
   } catch (err) {
     response.body = { message: err.message };
     response.status = 400; // bad request

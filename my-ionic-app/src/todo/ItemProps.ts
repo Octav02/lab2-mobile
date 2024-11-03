@@ -4,5 +4,5 @@ export interface ItemProps {
   sellDate: Date;
   price: number;
   isElectric: boolean;
-
+  isNotSaved?: boolean;
 }
