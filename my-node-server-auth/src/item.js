@@ -63,6 +63,7 @@ const createItem = async (ctx, item, response) => {
     const userId = ctx.state.user._id;
     item.userId = userId;
     item.isNotSaved = false;
+    console.log(item);
     response.body = await itemStore.insert(item);
     response.status = 201; // created
     broadcast(userId, { type: 'created', payload: {updatedItem: item} });
@@ -78,6 +79,7 @@ itemRouter.put('/:id', async ctx => {
   const item = ctx.request.body;
   const id = ctx.params.id;
   const itemId = item._id;
+  item.isNotSaved = false;
   const response = ctx.response;
   if (itemId && itemId !== id) {
     response.body = { message: 'Param id and body _id should be the same' };

@@ -6,7 +6,7 @@ interface ItemPropsExt extends ItemProps {
   onEdit: (_id?: string) => void;
 }
 
-const Item: React.FC<ItemPropsExt> = ({ _id, model, sellDate,price, isElectric, onEdit }) => {
+const Item: React.FC<ItemPropsExt> = ({ _id, model, sellDate,price, isElectric, isNotSaved, onEdit }) => {
   const formattedSellDate = parseIsoDate(sellDate.toString());
     return (
         <IonItem onClick={() => onEdit(_id)}>
@@ -14,6 +14,7 @@ const Item: React.FC<ItemPropsExt> = ({ _id, model, sellDate,price, isElectric, 
             <IonLabel>{price}</IonLabel>
             <IonCheckbox slot="start" checked={isElectric}/>
             <IonLabel>{formattedSellDate}</IonLabel> 
+            {isNotSaved && <IonLabel color="danger">Not saved</IonLabel>}
         </IonItem>
     );
 };

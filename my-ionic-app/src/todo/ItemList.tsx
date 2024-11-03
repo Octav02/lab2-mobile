@@ -124,7 +124,7 @@ const ItemList: React.FC<RouteComponentProps> = ({ history }) => {
 
         {itemsAux && (
           <IonList>
-            {itemsAux.map(({ _id, model, sellDate, price, isElectric }) => (
+            {itemsAux.map(({ _id, model, sellDate, price, isElectric,isNotSaved }) => (
               <Item
                 key={_id}
                 _id={_id}
@@ -132,6 +132,7 @@ const ItemList: React.FC<RouteComponentProps> = ({ history }) => {
                 isElectric={isElectric}
                 model={model}
                 sellDate={sellDate}
+                isNotSaved={isNotSaved}
                 onEdit={(id) => history.push(`/item/${id}`)}
               />
             ))}
