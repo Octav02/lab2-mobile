@@ -1,0 +1,7 @@
+{
+  "name": "ionicPagingFilteringApp",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
